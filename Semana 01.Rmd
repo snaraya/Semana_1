@@ -74,12 +74,34 @@ mujeres
 Ocupemos la variable pn4 sobre satisfacción por la democracia:
 
 ```{r}
-lapop %>%
+df_satisfaccion <- lapop %>%
   select(a4, q1tb, pn4) %>% 
   filter(q1tb == 2) %>% 
   mutate(pn4_a = case_when(pn4 < 2 ~ "Satisfecho",
                    pn4 == 3 ~ "Ni satisfecho ni insatisfecho",
                    pn4 > 3 ~ "Insatisfecho",
                    T ~ "No sabe/No responde"))
+
+str(df_satisfaccion)
+
+sjmisc::frq(df_satisfaccion, pn4_a)
+
+```
+
+Me gusta ocupar 'case_when', pero de esa manera la nueva variable queda en formato *string or character*. La idea es no cambiar el formato de la variable, trabajar con *factors* es mucho más simple en este caso.
+
+```{r}
+df_satisfaccion2 <- lapop %>%
+  select(a4, q1tb, pn4) %>% 
+  filter(q1tb == 2) %>% 
+  mutate(pn4_a = sjmisc::rec(pn4, 
+                     rec = '1:2 = 1[Satisfecho];
+                            3 = 2[Neutro];
+                            4:5 = 3[Insatisfecho]'))
+
+str(df_satisfaccion2)
+
+sjmisc::frq(df_satisfaccion2, pn4_a)
+
 ```
 
