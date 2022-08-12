@@ -1,0 +1,85 @@
+---
+title: "Clase 01. Introducción"
+author: "Marcelo Vera Álvarez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Introducción
+
+Primero cargaremos nuestros paquetes:
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+Luego cargaremos nuestra base de datos.
+
+```{r}
+lapop <- read_dta("LAPOP_CHILE2021.dta")
+```
+
+Revisamos nuestros datos:
+
+```{r}
+colnames(lapop)
+
+#Podemos ver las que más nos interesan con head()
+```
+
+Trabajemos con la variable a4 ¿En su opinión cuáles son los problemas más grandes que enfrenta el país?
+
+```{r}
+lapop %>% 
+  group_by(a4) %>% 
+  summarize(n = n()) %>% 
+  arrange(-n)
+```
+
+La variable q1tb agrupa por género, supongamos que queremos saber los resultados por género.
+
+```{r}
+lapop %>% 
+  group_by(a4, q1tb) %>% 
+  summarize(n = n()) %>% 
+  arrange(-n)
+```
+
+Otra forma de ver lo mismo es con sjmisc:
+
+Normalmente sjmisc::frq se usa para medir categorías dentro de una variable.
+
+```{r}
+sjmisc::frq(lapop,q1tb)
+```
+
+Podemos filtrar sólo para mujeres con la función filter
+
+```{r}
+mujeres <- lapop %>%
+  select(a4, q1tb) %>% 
+  group_by(a4, q1tb) %>% 
+  summarize(n = n()) %>% 
+  arrange(-n) %>% 
+  filter(q1tb == 2)
+  
+mujeres
+```
+
+Ocupemos la variable pn4 sobre satisfacción por la democracia:
+
+```{r}
+lapop %>%
+  select(a4, q1tb, pn4) %>% 
+  filter(q1tb == 2) %>% 
+  mutate(pn4_a = case_when(pn4 < 2 ~ "Satisfecho",
+                   pn4 == 3 ~ "Ni satisfecho ni insatisfecho",
+                   pn4 > 3 ~ "Insatisfecho",
+                   T ~ "No sabe/No responde"))
+```
+
